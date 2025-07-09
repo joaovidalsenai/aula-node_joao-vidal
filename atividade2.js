@@ -1,4 +1,4 @@
-let numero = parseFloat(prompt("Digite um número:"));
+let numero = 10;
     
 if (numero > 10) {
     console.log("O número é maior que 10");

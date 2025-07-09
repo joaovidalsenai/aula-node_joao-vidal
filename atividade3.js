@@ -1,6 +1,6 @@
-let a = parseFloat(prompt("Digite o valor de A:"));
-let b = parseFloat(prompt("Digite o valor de B:"));
-let c = parseFloat(prompt("Digite o valor de C:"));
+let a = 1;
+let b = 2;
+let c = 3;
 
 let soma = a + b;
 
