@@ -1,0 +1,20 @@
+{
+  "name": "aula-node_joao-vidal",
+  "version": "1.0.0",
+  "main": "aula01.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joaovidalsenai/aula-node_joao-vidal.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joaovidalsenai/aula-node_joao-vidal/issues"
+  },
+  "homepage": "https://github.com/joaovidalsenai/aula-node_joao-vidal#readme",
+  "description": ""
+}
