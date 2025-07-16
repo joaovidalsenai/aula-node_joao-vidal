@@ -1,4 +1,4 @@
-let idade = 18
+let idade = 54
 
 if (idade >= 0 && idade < 7) {
     console.log("Infância");
