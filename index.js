@@ -38,8 +38,7 @@ function getValidEntries(dirPath, isRoot = false) {
     const fullPath = path.join(dirPath, entry.name);
 
     if (isRoot) {
-      // No primeiro nível, mostrar apenas diretórios com nome tipo "09-07-2025"
-      return entry.isDirectory() && (/^\d{2}-\d{2}-\d{4}$/.test(entry.name) || /^\d{4}-\d{2}-\d{2}$/.test(entry.name));
+      return entry.isDirectory() && /^[\d-]+$/.test(entry.name);
     }
 
     if (entry.isDirectory()) {
@@ -52,15 +51,17 @@ function getValidEntries(dirPath, isRoot = false) {
 }
 
 //
-// 4. Navegação recursiva até selecionar um arquivo .js
+// 4. Navegação recursiva com opção de voltar
 //
 async function navigate(currentPath = __dirname, isRoot = true) {
+  const history = [];
+
   while (true) {
     const entries = getValidEntries(currentPath, isRoot);
 
     if (entries.length === 0) {
       console.error('✖ Nenhum item válido encontrado em', currentPath);
-      process.exit(1);
+      return null;
     }
 
     console.log(`\nConteúdo de: ${path.relative(__dirname, currentPath) || '.'}`);
@@ -68,47 +69,75 @@ async function navigate(currentPath = __dirname, isRoot = true) {
       const label = entry.isDirectory() ? `📁 ${entry.name}` : `📄 ${entry.name}`;
       console.log(`  ${i + 1}. ${label}`);
     });
+    console.log(`  0. 🔙 Voltar`);
 
-    const idx = parseInt(await ask('\nDigite o número da opção: '), 10) - 1;
+    const idx = parseInt(await ask('\nDigite o número da opção: '), 10);
 
-    if (idx < 0 || idx >= entries.length) {
-      console.error('✖ Seleção inválida');
-      process.exit(1);
+    if (idx === 0) {
+      if (history.length === 0) {
+        console.log('🚪 Saindo da navegação...');
+        return null;
+      }
+      currentPath = history.pop();
+      isRoot = false;
+      continue;
     }
 
-    const selected = entries[idx];
+    const selected = entries[idx - 1];
+    if (!selected) {
+      console.error('✖ Seleção inválida');
+      continue;
+    }
+
     const selectedPath = path.join(currentPath, selected.name);
 
     if (selected.isFile()) {
       return selectedPath;
     }
 
+    history.push(currentPath);
     currentPath = selectedPath;
-    isRoot = false; // Após o primeiro nível, mostrar tudo normalmente
+    isRoot = false;
   }
 }
 
 //
-// 5. Executa o arquivo com nodemon
+// 5. Loop principal: escolher, executar, repetir
 //
-async function runSelector() {
-  const scriptPath = await navigate();
+async function runSelectorLoop() {
+  while (true) {
+    const scriptPath = await navigate();
+    if (!scriptPath) break;
 
-  console.clear();
-  console.log(`\n▶ Monitorando e executando: ${path.relative(__dirname, scriptPath)}\n`);
+    console.clear();
+    console.log(`\n▶ Monitorando e executando: ${path.relative(__dirname, scriptPath)}\n`);
 
-  nodemon({
-    watch: [scriptPath],
-    exec: `node ${scriptPath}`
-  });
+    await new Promise(resolve => {
+      nodemon({
+        watch: [scriptPath],
+        exec: `node ${scriptPath}`,
+        exitcrash: true,
+        verbose: false
+      });
 
-  nodemon
-    .on('start', () => console.log('↻ Iniciado'))
-    .on('restart', files => console.log(`↻ Reiniciado por: ${files}`))
-    .on('quit', () => console.log('✖ Encerrado') || process.exit());
+      nodemon
+        .once('quit', () => {
+          console.log('\n⏹ Execução encerrada. Retornando ao menu...');
+          resolve();
+        });
+
+      // Permitir encerrar manualmente com Ctrl+C
+      process.once('SIGINT', () => {
+        nodemon.emit('quit');
+      });
+    });
+  }
+
+  console.log('\n👋 Encerrado. Até a próxima!');
+  process.exit(0);
 }
 
-runSelector().catch(err => {
+runSelectorLoop().catch(err => {
   console.error('Erro inesperado:', err);
   process.exit(1);
 });
