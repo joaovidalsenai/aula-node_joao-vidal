@@ -1,0 +1,6 @@
+{
+  "watch": ["index.js", "09-07-2025", "16-07-2025", "23-07-2025"],
+  "ext":   "js,json",
+  "ignore": ["node_modules"],
+  "exec":  "node index.js"
+}
