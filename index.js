@@ -36,7 +36,7 @@ async function runSelector() {
   const baseDir = __dirname;
   const dirs = fs
     .readdirSync(baseDir, { withFileTypes: true })
-    .filter(d => d.isDirectory() && /^\d{2}-\d{2}-\d{4}$/.test(d.name))
+    .filter(d => d.isDirectory())
     .map(d => d.name);
 
   if (dirs.length === 0) {
