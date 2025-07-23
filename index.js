@@ -29,17 +29,24 @@ function ask(question) {
 }
 
 //
-// 3. Filtra apenas pastas e arquivos .js
+// 3. Filtra entradas válidas
 //
-function getValidEntries(dirPath) {
+function getValidEntries(dirPath, isRoot = false) {
   const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
   return entries.filter(entry => {
+    const fullPath = path.join(dirPath, entry.name);
+
+    if (isRoot) {
+      // No primeiro nível, mostrar apenas diretórios com nome tipo "09-07-2025"
+      return entry.isDirectory() && (/^\d{2}-\d{2}-\d{4}$/.test(entry.name) || /^\d{4}-\d{2}-\d{2}$/.test(entry.name));
+    }
+
     if (entry.isDirectory()) {
-      const subPath = path.join(dirPath, entry.name);
-      const subEntries = fs.readdirSync(subPath, { withFileTypes: true });
+      const subEntries = fs.readdirSync(fullPath, { withFileTypes: true });
       return subEntries.some(e => e.isDirectory() || e.name.endsWith('.js'));
     }
+
     return entry.isFile() && entry.name.endsWith('.js');
   });
 }
@@ -47,12 +54,12 @@ function getValidEntries(dirPath) {
 //
 // 4. Navegação recursiva até selecionar um arquivo .js
 //
-async function navigate(currentPath = __dirname) {
+async function navigate(currentPath = __dirname, isRoot = true) {
   while (true) {
-    const entries = getValidEntries(currentPath);
+    const entries = getValidEntries(currentPath, isRoot);
 
     if (entries.length === 0) {
-      console.error('✖ Nenhum arquivo ou pasta válida encontrada em', currentPath);
+      console.error('✖ Nenhum item válido encontrado em', currentPath);
       process.exit(1);
     }
 
@@ -77,6 +84,7 @@ async function navigate(currentPath = __dirname) {
     }
 
     currentPath = selectedPath;
+    isRoot = false; // Após o primeiro nível, mostrar tudo normalmente
   }
 }
 
