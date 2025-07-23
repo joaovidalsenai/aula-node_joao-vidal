@@ -1,10 +1,11 @@
 {
   "name": "aula-node_joao-vidal",
   "version": "1.0.0",
-  "main": "src/index.js",
+  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "index": "node src/index.js"
-  },
+    "index": "node index.js",
+    "dev": "nodemon --watch . --ext js --ignore node_modules --exec \"node index.js\""  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/joaovidalsenai/aula-node_joao-vidal.git"
@@ -19,6 +20,10 @@
   "description": "",
   "dependencies": {
     "express": "^5.1.0",
+    "inquirer": "^12.8.2",
     "nodemon": "^3.1.10"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
