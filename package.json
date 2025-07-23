@@ -16,5 +16,8 @@
     "url": "https://github.com/joaovidalsenai/aula-node_joao-vidal/issues"
   },
   "homepage": "https://github.com/joaovidalsenai/aula-node_joao-vidal#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
