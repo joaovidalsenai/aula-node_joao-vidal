@@ -1,6 +1,4 @@
 // Exercício 4: Objeto produto com for...in
-console.log("=== Informações do Produto ===");
-
 const produto = {
     nome: "Smartphone Galaxy",
     preco: 1299.99,

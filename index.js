@@ -16,7 +16,7 @@ const __dirname  = path.dirname(__filename);
 //
 function ask(question) {
   const rl = readline.createInterface({
-    input:  process.stdin,
+    input: process.stdin,
     output: process.stdout
   });
 
@@ -29,78 +29,75 @@ function ask(question) {
 }
 
 //
-// 3. Seleção de pasta e arquivo, depois dispara o Nodemon
+// 3. Filtra apenas pastas e arquivos .js
+//
+function getValidEntries(dirPath) {
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+
+  return entries.filter(entry => {
+    if (entry.isDirectory()) {
+      const subPath = path.join(dirPath, entry.name);
+      const subEntries = fs.readdirSync(subPath, { withFileTypes: true });
+      return subEntries.some(e => e.isDirectory() || e.name.endsWith('.js'));
+    }
+    return entry.isFile() && entry.name.endsWith('.js');
+  });
+}
+
+//
+// 4. Navegação recursiva até selecionar um arquivo .js
+//
+async function navigate(currentPath = __dirname) {
+  while (true) {
+    const entries = getValidEntries(currentPath);
+
+    if (entries.length === 0) {
+      console.error('✖ Nenhum arquivo ou pasta válida encontrada em', currentPath);
+      process.exit(1);
+    }
+
+    console.log(`\nConteúdo de: ${path.relative(__dirname, currentPath) || '.'}`);
+    entries.forEach((entry, i) => {
+      const label = entry.isDirectory() ? `📁 ${entry.name}` : `📄 ${entry.name}`;
+      console.log(`  ${i + 1}. ${label}`);
+    });
+
+    const idx = parseInt(await ask('\nDigite o número da opção: '), 10) - 1;
+
+    if (idx < 0 || idx >= entries.length) {
+      console.error('✖ Seleção inválida');
+      process.exit(1);
+    }
+
+    const selected = entries[idx];
+    const selectedPath = path.join(currentPath, selected.name);
+
+    if (selected.isFile()) {
+      return selectedPath;
+    }
+
+    currentPath = selectedPath;
+  }
+}
+
+//
+// 5. Executa o arquivo com nodemon
 //
 async function runSelector() {
-  // 3.1 Listar pastas no formato DD-MM-YYYY
-  const baseDir = __dirname;
-  const dirs = fs
-    .readdirSync(baseDir, { withFileTypes: true })
-    .filter(d => d.isDirectory())
-    .map(d => d.name);
-
-  if (dirs.length === 0) {
-    console.error('✖ Nenhuma pasta de aula encontrada em', baseDir);
-    process.exit(1);
-  }
-
-  console.log('\nPastas disponíveis:');
-  dirs.forEach((d, i) => console.log(`  ${i + 1}. ${d}`));
-
-  const idxDir = parseInt(
-    await ask('\nDigite o número da pasta desejada: '),
-    10
-  ) - 1;
-
-  if (idxDir < 0 || idxDir >= dirs.length) {
-    console.error('✖ Seleção de pasta inválida');
-    process.exit(1);
-  }
-
-  const chosenDir = dirs[idxDir];
-  const dirPath   = path.join(baseDir, chosenDir);
-
-  // 3.2 Listar arquivos .js dentro da pasta escolhida
-  const files = fs
-    .readdirSync(dirPath)
-    .filter(f => f.endsWith('.js'));
-
-  if (files.length === 0) {
-    console.error(`✖ Nenhum .js encontrado em ${chosenDir}`);
-    process.exit(1);
-  }
-
-  console.log('\nArquivos disponíveis:');
-  files.forEach((f, i) => console.log(`  ${i + 1}. ${f}`));
-
-  const idxFile = parseInt(
-    await ask('\nDigite o número do arquivo desejado: '),
-    10
-  ) - 1;
-
-  if (idxFile < 0 || idxFile >= files.length) {
-    console.error('✖ Seleção de arquivo inválida');
-    process.exit(1);
-  }
-
-  const chosenFile = files[idxFile];
-  const scriptPath = path.join(dirPath, chosenFile);
+  const scriptPath = await navigate();
 
   console.clear();
-  console.log(`\n▶ Monitorando e executando: ${chosenDir}/${chosenFile}\n`);
+  console.log(`\n▶ Monitorando e executando: ${path.relative(__dirname, scriptPath)}\n`);
 
-  //
-  // 3.3 Configurar e disparar o Nodemon programaticamente
-  //
   nodemon({
     watch: [scriptPath],
-    exec:  `node ${scriptPath}`
+    exec: `node ${scriptPath}`
   });
 
   nodemon
-    .on('start',  ()       => console.log('↻ Iniciado'))
-    .on('restart',(files)  => console.log(`↻ Reiniciado por: ${files}`))
-    .on('quit',   ()       => console.log('✖ Encerrado') || process.exit());
+    .on('start', () => console.log('↻ Iniciado'))
+    .on('restart', files => console.log(`↻ Reiniciado por: ${files}`))
+    .on('quit', () => console.log('✖ Encerrado') || process.exit());
 }
 
 runSelector().catch(err => {

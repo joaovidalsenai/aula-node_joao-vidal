@@ -10,7 +10,6 @@ const numeroSecreto = Math.floor(Math.random() * 10) + 1;
 let tentativas = 0;
 let acertou = false;
 
-console.log("=== Jogo de Adivinhação ===");
 console.log("Tente adivinhar o número secreto entre 1 e 10:");
 
 function fazerPergunta() {
