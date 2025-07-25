@@ -32,5 +32,3 @@ function fazerPergunta() {
 }
 
 fazerPergunta();
-
-export { numeroSecreto, tentativas };
