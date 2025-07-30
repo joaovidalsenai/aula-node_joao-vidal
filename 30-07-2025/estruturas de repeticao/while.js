@@ -19,3 +19,5 @@ function test(){
 
     console.log(results);
 }
+
+test()
