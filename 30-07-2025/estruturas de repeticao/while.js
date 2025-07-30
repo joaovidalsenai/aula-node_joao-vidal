@@ -1,8 +1,21 @@
-let sum = 0;
-console.log("Soma até o numero ser maior que 10\nValor inicial: 0");
-while(sum <= 10){
-    let add = Math.random();
-    sum+=add;
-    console.log(`+${add}`);
+function attempt(target){
+    let sum = 0;
+    let count = 0;
+    while(sum <= target){
+        sum+=Math.random();;
+        count++;
+    }
+    return count 
 }
-console.log(`=${sum}`);
+
+function test(){
+    let results = []
+    const tries = 10;
+    const target = 10;
+
+    for(i = 1; i <= tries; i++){
+        results.push(attempt());
+    }
+
+    console.log(results);
+}
