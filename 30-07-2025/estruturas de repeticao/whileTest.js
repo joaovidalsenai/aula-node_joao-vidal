@@ -64,9 +64,8 @@ async function variance(arr) {
     return sumOfSquaredDifferences / (arr.length);
 }
 
-async function standardDeviation(arr) {
-    const varianceValue = await variance(arr);
-    return Math.sqrt(varianceValue);
+async function standardDeviation(variance) {
+    return Math.sqrt(variance);
 }
 
 async function test(){
@@ -86,7 +85,7 @@ async function test(){
     const meanValue = await mean(sorted);
     const medianValue = await median(sorted);
     const modeValue = await mode(sorted);
-    const stdDev = await standardDeviation(sorted);
+    const stdDev = await standardDeviation(varianceValue);
     
     const evaluation = {
         "lowest": lowest,
